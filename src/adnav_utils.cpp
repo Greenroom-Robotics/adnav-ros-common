@@ -197,6 +197,9 @@ namespace utils {
                 ss << "\n\t" << std::setw(2) << std::right << i << " | IF Name: " << ptr_entry->ifa_name << "\t";
 
                 // Check that the interface is IPv4
+                if (ptr_entry->ifa_addr == nullptr)
+                    continue;
+
                 sa_family_t address_family = ptr_entry->ifa_addr->sa_family;
                 if (address_family == AF_INET) {
                     // IPv4
