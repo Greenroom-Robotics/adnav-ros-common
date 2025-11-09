@@ -99,7 +99,10 @@ class Communicator{
          * @param ops Options data structure. see adnav_connections_data_t 
         */
         Communicator(const adnav_connections_data_t& ops) {initComms(ops);}
-        ~Communicator() {close();}
+        ~Communicator() {
+            if (isOpen()) {
+                close();}
+        }
         bool isOpen() {return isOpen_;}
 
         void initComms(const adnav_connections_data_t& ops);
