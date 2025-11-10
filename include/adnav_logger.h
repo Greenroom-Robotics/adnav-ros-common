@@ -38,6 +38,7 @@
 #include <ctime>
 #include <memory>
 #include <stdexcept>
+#include <filesystem>
 
 namespace adnav {
 
@@ -164,27 +165,26 @@ class Logger : public std::ofstream{
          * private filename member. 
          * This places it into the format <path><prefix>_YY-MM-DD_HH-MM-SS<file_type>
         */
-        void setFilename(const std::string& prefix, const std::string& file_type,
+        void setFilename(std::string prefix, const std::string& file_type,
             const std::string& path = ""){
-            // make a stringstream
-            std::stringstream ss;
             time(&time_);
             timeInfo_ = localtime(&time_);
-            std::string local_path = path;
-            std::string local_prefix = prefix;
 
-
-            // If the string path starts with a ~ shortcut for home, adjust it.
-            if(path.at(0) == '~') {
-                local_path.replace(0, 1, getenv("HOME"));
+            std::filesystem::path dir(path);
+            if (!path.empty() && path[0] == '~') {
+                const char* home = std::getenv("HOME");
+                if (home) {
+                    dir = std::filesystem::path(std::string(home)) / path.substr(2);
+                }
             }
 
             // If the last character of the prefix is a '_' remove it.
-            if(prefix.back() == '_') local_prefix.pop_back();
+            if(prefix.back() == '_') prefix.pop_back();
 
-            ss << local_path << local_prefix << std::put_time(timeInfo_, "_%y-%m-%d_%H-%M-%S") << file_type;
+            std::stringstream ss;
+            ss << prefix << std::put_time(timeInfo_, "_%y-%m-%d_%H-%M-%S") << file_type;
 
-            filename_ = ss.str();
+            filename_ = dir / ss.str();
         }
 };
 
